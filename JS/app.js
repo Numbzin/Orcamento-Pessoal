@@ -188,6 +188,8 @@ function preencherAnos() {
   const selectAno = document.getElementById("ano");
   const anoAtual = new Date().getFullYear();
 
+  console.log("Preenchendo anos..."); // Verifique no console se essa linha é impressa
+
   selectAno.innerHTML = '<option value="">Selecione</option>';
   for (let i = 0; i < 2; i++) {
     const option = document.createElement("option");
