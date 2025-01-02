@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/public/index.html" },
-    { "source": "/consulta", "destination": "/public/consulta.html" }
+    { "source": "/consulta", "destination": "/consulta.html" },
+    { "source": "/cadastro", "destination": "/index.html" }
   ]
 }
