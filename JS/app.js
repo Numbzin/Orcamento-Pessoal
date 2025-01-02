@@ -186,15 +186,16 @@ function limparFormulario() {
 
 function preencherAnos() {
   const selectAno = document.getElementById("ano");
+  if (!selectAno) return;
 
-  const anoAtual = new Date().getUTCFullYear();
-
+  const anoAtual = new Date().getFullYear();
   selectAno.innerHTML = '<option value="">Selecione</option>';
 
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i <= 1; i++) {
+    const ano = anoAtual - i;
     const option = document.createElement("option");
-    option.value = anoAtual - i;
-    option.textContent = anoAtual - i;
+    option.value = ano;
+    option.textContent = ano;
     selectAno.appendChild(option);
   }
 }
