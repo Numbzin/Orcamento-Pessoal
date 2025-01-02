@@ -1,8 +1,3 @@
-window.onload = function () {
-  console.log("Window loaded");
-  preencherAnos();
-};
-
 class Despesa {
   constructor(ano, mes, dia, tipo, descricao, valor) {
     this.ano = parseInt(ano);
@@ -26,7 +21,6 @@ class Despesa {
       descricao: () => this.descricao.length >= 3,
       valor: () => this.valor > 0 && !isNaN(this.valor),
     };
-
     return Object.values(validacoes).every((validacao) => validacao());
   }
 
@@ -66,11 +60,16 @@ class Bd {
   }
 
   gravar(despesa) {
-    const despesas = this.recuperarTodosRegistros();
-    despesa.id = this.gerarId(despesas);
-    despesas.push(despesa);
-    localStorage.setItem(this.storageKey, JSON.stringify(despesas));
-    return true;
+    try {
+      const despesas = this.recuperarTodosRegistros();
+      despesa.id = this.gerarId(despesas);
+      despesas.push(despesa);
+      localStorage.setItem(this.storageKey, JSON.stringify(despesas));
+      return true;
+    } catch (error) {
+      console.error("Erro ao gravar no localStorage:", error);
+      return false;
+    }
   }
 
   gerarId(despesas) {
@@ -78,21 +77,26 @@ class Bd {
   }
 
   recuperarTodosRegistros() {
-    const despesas = JSON.parse(localStorage.getItem(this.storageKey)) || [];
-    return despesas
-      .map((d) => {
-        const despesa = new Despesa(
-          d.ano,
-          d.mes,
-          d.dia,
-          d.tipo,
-          d.descricao,
-          d.valor
-        );
-        despesa.id = d.id;
-        return despesa;
-      })
-      .sort((a, b) => b.data - a.data);
+    try {
+      const despesas = JSON.parse(localStorage.getItem(this.storageKey)) || [];
+      return despesas
+        .map((d) => {
+          const despesa = new Despesa(
+            d.ano,
+            d.mes,
+            d.dia,
+            d.tipo,
+            d.descricao,
+            d.valor
+          );
+          despesa.id = d.id;
+          return despesa;
+        })
+        .sort((a, b) => b.data - a.data);
+    } catch (error) {
+      console.error("Erro ao recuperar registros:", error);
+      return [];
+    }
   }
 
   pesquisar(filtros) {
@@ -113,10 +117,15 @@ class Bd {
   }
 
   remover(id) {
-    let despesas = this.recuperarTodosRegistros();
-    despesas = despesas.filter((d) => d.id !== parseInt(id));
-    localStorage.setItem(this.storageKey, JSON.stringify(despesas));
-    return true;
+    try {
+      let despesas = this.recuperarTodosRegistros();
+      despesas = despesas.filter((d) => d.id !== parseInt(id));
+      localStorage.setItem(this.storageKey, JSON.stringify(despesas));
+      return true;
+    } catch (error) {
+      console.error("Erro ao remover:", error);
+      return false;
+    }
   }
 
   calcularTotal() {
@@ -131,6 +140,8 @@ const bd = new Bd();
 
 function mostrarModal(tipo, titulo, mensagem) {
   const modalEl = document.getElementById("modalRegistraDespesa");
+  const modal = new bootstrap.Modal(modalEl);
+
   const headerEl = modalEl.querySelector(".modal-header");
   const titleEl = modalEl.querySelector(".modal-title");
   const bodyEl = modalEl.querySelector(".modal-body");
@@ -144,11 +155,12 @@ function mostrarModal(tipo, titulo, mensagem) {
   bodyEl.textContent = mensagem;
   btnEl.className = `btn ${tipo === "sucesso" ? "btn-success" : "btn-danger"}`;
 
-  new bootstrap.Modal(modalEl).show();
+  modal.show();
 }
 
 function cadastrarDespesa(event) {
   event.preventDefault();
+
   const despesa = new Despesa(
     document.getElementById("ano").value,
     document.getElementById("mes").value,
@@ -166,9 +178,7 @@ function cadastrarDespesa(event) {
         "A despesa foi cadastrada com sucesso!"
       );
       limparFormulario();
-      if (window.location.href.includes("consulta.html")) {
-        carregarListaDespesas();
-      }
+      carregarListaDespesas();
     } else {
       mostrarModal(
         "erro",
@@ -186,65 +196,50 @@ function cadastrarDespesa(event) {
 }
 
 function limparFormulario() {
-  document.querySelector("form").reset();
-}
-
-function preencherAnos() {
-  const selectAno = document.getElementById("ano");
-  if (!selectAno) return;
-
-  const anoAtual = new Date().getFullYear();
-  selectAno.innerHTML = '<option value="">Selecione</option>';
-
-  for (let i = 0; i <= 1; i++) {
-    const ano = anoAtual - i;
-    const option = document.createElement("option");
-    option.value = ano;
-    option.textContent = ano;
-    selectAno.appendChild(option);
-  }
+  const form = document.querySelector("form");
+  if (form) form.reset();
 }
 
 function carregarListaDespesas(despesasFiltradas = null) {
-  const despesas = despesasFiltradas || bd.recuperarTodosRegistros();
   const listaDespesas = document.querySelector(".listaDespesas");
-
   if (!listaDespesas) return;
 
-  listaDespesas.innerHTML = "";
-  if (despesas.length === 0) {
-    listaDespesas.innerHTML =
-      '<tr><td colspan="5" class="text-center">Nenhuma despesa encontrada</td></tr>';
-  } else {
-    despesas.forEach((despesa) => {
-      const linha = listaDespesas.insertRow();
-      linha.innerHTML = `
-                <td>${despesa.getDataFormatada()}</td>
-                <td>${despesa.getTipoTexto()}</td>
-                <td>${despesa.descricao}</td>
-                <td>${despesa.getValorFormatado()}</td>
-                <td>
-                    <button onclick="mostrarModalConfirmacaoExclusao(${
-                      despesa.id
-                    })" class="btn btn-danger btn-sm">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
-    });
+  const despesas = despesasFiltradas || bd.recuperarTodosRegistros();
 
+  listaDespesas.innerHTML =
+    despesas.length === 0
+      ? '<tr><td colspan="5" class="text-center">Nenhuma despesa encontrada</td></tr>'
+      : despesas
+          .map(
+            (despesa) => `
+        <tr>
+          <td>${despesa.getDataFormatada()}</td>
+          <td>${despesa.getTipoTexto()}</td>
+          <td>${despesa.descricao}</td>
+          <td>${despesa.getValorFormatado()}</td>
+          <td>
+            <button onclick="mostrarModalConfirmacaoExclusao(${
+              despesa.id
+            })" class="btn btn-danger btn-sm">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `
+          )
+          .join("");
+
+  if (despesas.length > 0) {
     const total = bd.calcularTotal();
     listaDespesas.insertAdjacentHTML(
       "beforeend",
-      `
-            <tr class="table-info">
-                <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                <td colspan="2"><strong>${new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(total)}</strong></td>
-            </tr>
-        `
+      `<tr class="table-info">
+        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+        <td colspan="2"><strong>${new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(total)}</strong></td>
+      </tr>`
     );
   }
 }
@@ -264,34 +259,28 @@ function pesquisarDespesas() {
 }
 
 function mostrarModalConfirmacaoExclusao(id) {
-  const modal = document.getElementById("modalConfirmacaoExclusao");
-  const confirmButton = modal.querySelector(".btn-danger");
+  const modalEl = document.getElementById("modalConfirmacaoExclusao");
+  const modal = new bootstrap.Modal(modalEl);
+  const confirmButton = modalEl.querySelector(".btn-danger");
   confirmButton.dataset.id = id;
-  new bootstrap.Modal(modal).show();
+  modal.show();
 }
 
 function confirmarRemocao(id) {
   if (bd.remover(id)) {
-    carregarListaDespesas();
-
     const modalEl = document.getElementById("modalConfirmacaoExclusao");
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance) {
-      modalInstance.hide();
-    }
-  }
-}
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
 
-function inicializarEventos() {
-  const form = document.querySelector("form");
-  if (form) {
-    form.addEventListener("submit", cadastrarDespesa);
-  }
-  if (window.location.href.includes("consulta.html")) {
     carregarListaDespesas();
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  inicializarEventos();
+  const form = document.getElementById("formDespesa");
+  if (form) {
+    form.addEventListener("submit", cadastrarDespesa);
+  }
+
+  carregarListaDespesas();
 });
