@@ -1,3 +1,8 @@
+window.onload = function () {
+  console.log("Window loaded");
+  preencherAnos();
+};
+
 class Despesa {
   constructor(ano, mes, dia, tipo, descricao, valor) {
     this.ano = parseInt(ano);
@@ -288,6 +293,5 @@ function inicializarEventos() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  preencherAnos();
   inicializarEventos();
 });
