@@ -1,0 +1,47 @@
+body {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  font-family: "Arial", sans-serif;
+  line-height: 1.6;
+}
+
+.navbar {
+  background-color: #333 !important;
+}
+
+.navbar-nav .nav-link {
+  color: #e0e0e0 !important;
+}
+
+.navbar-nav .nav-link.active {
+  color: #000000 !important;
+}
+
+.modal-content {
+  background-color: #282828;
+  color: #e0e0e0;
+}
+
+.btn-secondary {
+  background-color: #444;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.btn-secondary:hover {
+  background-color: #555;
+  border-color: #666;
+}
+
+::placeholder {
+  color: #ff0404;
+  opacity: 1;
+}
+
+:-ms-input-placeholder {
+  color: #888;
+}
+
+::-ms-input-placeholder {
+  color: #888;
+}
