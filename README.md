@@ -39,9 +39,9 @@ Este projeto permite registrar, consultar e excluir despesas de forma simples e 
 /projeto
   ├── index.html        # Página principal para cadastro de despesas
   ├── consulta.html     # Página para consulta e exclusão de despesas
-  ├── /css/style.css    # Arquivo de estilos
-  ├── /JS/app.js        # Arquivo com a lógica de cadastro, consulta e exclusão de despesas
-  ├── src/              # Imagens e outros recursos
+  ├── /styles/style.css # Arquivo de estilos
+  ├── /scripts/app.js   # Arquivo com a lógica de cadastro, consulta e exclusão de despesas
+  ├── assets/           # Imagens e outros recursos
   └── README.md         # Este arquivo
 ```
 
