@@ -70,6 +70,14 @@
             <label for="ano" class="form-label">Ano</label>
             <select class="form-control" id="ano">
               <option value="">Selecione</option>
+              <script>
+                document.write(
+                  `<option value="${new Date().getFullYear()}">${new Date().getFullYear()}</option>
+                  <option value="${new Date().getFullYear() - 1}">${
+                    new Date().getFullYear() - 1
+                  }</option>`
+                );
+              </script>
             </select>
           </div>
 
